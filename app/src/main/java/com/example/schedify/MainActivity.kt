@@ -34,8 +34,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
+import com.example.schedify.ui.theme.DeepRed
 import com.example.schedify.ui.theme.LightGray
 
 
@@ -63,6 +63,7 @@ fun AppNavigation() {
         composable("login") { LoginScreen(navController) }
         composable("register") { RegisterScreen(navController) }
         composable("dashboard") { DashboardScreen(navController) }
+        composable("schedule") { MyScheduleScreen(navController) } // Add this line
     }
 }
 
@@ -543,6 +544,336 @@ private fun ScheduleCard(courseName: String) {
 }
 
 @Composable
+fun MyScheduleScreen(navController: NavController) {
+    var searchQuery by remember { mutableStateOf("") }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = Teal)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 40.dp) // Add padding to avoid overlap with the bottom navigation bar
+        ) {
+            // Top bar with title and search
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = "My Schedule",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = LightGray, // Change text color to LightGray
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                // Custom Search Bar
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 40.dp) // Reduced from 48.dp to 40.dp
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color.White)
+                ) {
+                    TextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 40.dp), // Reduced from 48.dp to 40.dp
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedTextColor = Color.Black,
+                            unfocusedTextColor = Color.Black,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        ),
+                        placeholder = {
+                            Text(
+                                text = "Search",
+                                color = Color.Gray
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Search",
+                                tint = Color.Gray
+                            )
+                        },
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp),
+                        textStyle = LocalTextStyle.current.copy(
+                            fontSize = 14.sp, // Reduced from 16.sp to 14.sp
+                            lineHeight = 20.sp  // Reduced from 24.sp to 20.sp
+                        )
+                    )
+                }
+            }
+
+            // Schedule content
+            val scheduleItems = listOf("Operating System", "Data Structures", "Algorithms", "Networking")
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                    .background(Color.White)
+                    .padding(start = 16.dp, top = 0.dp, end = 16.dp, bottom = 16.dp)
+            ) {
+                items(scheduleItems) { item ->
+                    Spacer(modifier = Modifier.height(6.dp))
+                    MyScheduleCard(courseName = item)
+                    Spacer(modifier = Modifier.height(6.dp))
+                }
+            }
+        }
+
+        // Bottom Navigation
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter) // Align the bottom navigation bar to the bottom
+                .fillMaxWidth()
+                .background(Teal) // Set background color to teal
+                .padding(vertical = 8.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                BottomNavItem(
+                    icon = Icons.Default.Home,
+                    label = "Home",
+                    onClick = { navController.navigate("dashboard") }
+                )
+                BottomNavItem(
+                    icon = Icons.Default.DateRange,
+                    label = "My Schedule",
+                    onClick = { navController.navigate("schedule") }
+                )
+                BottomNavItem(
+                    icon = Icons.Default.Add,
+                    label = "Booking",
+                    onClick = { navController.navigate("booking") }
+                )
+                BottomNavItem(
+                    icon = Icons.Default.Person,
+                    label = "Profile",
+                    onClick = { navController.navigate("profile") }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MyScheduleCard(courseName: String) {
+    var showCancelDialog by remember { mutableStateOf(false) }
+
+    // Cancel Confirmation Dialog
+    if (showCancelDialog) {
+        AlertDialog(
+            onDismissRequest = { showCancelDialog = false },
+            title = {
+                Text(
+                    "Cancel Schedule",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = DeepRed
+                )
+            },
+            text = {
+                Text(
+                    "Are you sure you want to cancel this schedule?",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        /* Handle Cancel Action */
+                        showCancelDialog = false
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = DeepRed
+                    )
+                ) {
+                    Text("Yes, Cancel")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showCancelDialog = false }
+                ) {
+                    Text("No, Keep")
+                }
+            }
+        )
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = LightGray)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Date section
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.width(80.dp)
+            ) {
+                Text(
+                    text = "JUNE",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Color.Gray
+                )
+                Text(
+                    text = "10",
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = Teal
+                )
+                Text(
+                    text = "2024",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Color.Gray
+                )
+            }
+
+            // Vertical divider
+            HorizontalDivider(
+                modifier = Modifier
+                    .width(2.dp)
+                    .height(90.dp)
+                    .background(color = Teal)
+            )
+
+            // Course details
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = courseName,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Teal
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        Icons.Default.DateRange,
+                        contentDescription = "Time",
+                        modifier = Modifier.size(16.dp),
+                        tint = Color.Gray
+                    )
+                    Text(
+                        text = "8:00 AM - 10:00 AM",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Place,
+                        contentDescription = "Room",
+                        modifier = Modifier.size(16.dp),
+                        tint = Color.Gray
+                    )
+                    Text(
+                        text = "SF 01",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Star,
+                        contentDescription = "Year",
+                        modifier = Modifier.size(16.dp),
+                        tint = Color.Gray
+                    )
+                    Text(
+                        text = "1st Year",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    // Edit Button
+                    Button(
+                        onClick = { /* Handle Edit Action */ },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(28.dp)
+                            .padding(horizontal = 4.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Teal),
+                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Edit",
+                            modifier = Modifier.size(14.dp),
+                            tint = Color.White
+                        )
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text(
+                            text = "Edit",
+                            fontSize = 12.sp,
+                            color = Color.White
+                        )
+                    }
+
+                    // Cancel Button
+                    Button(
+                        onClick = { showCancelDialog = true }, // Show dialog instead of direct action
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(28.dp)
+                            .padding(horizontal = 4.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = DeepRed),
+                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Cancel",
+                            modifier = Modifier.size(14.dp),
+                            tint = Color.White
+                        )
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text(
+                            text = "Cancel",
+                            fontSize = 12.sp,
+                            color = Color.White
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun BottomNavItem(
     icon: ImageVector,
     label: String,
@@ -568,8 +899,8 @@ private fun BottomNavItem(
 
 @Preview(showBackground = true)
 @Composable
-fun DefaultPreview() {
+fun MySchedulePreview() {
     SchedifyTheme {
-        DashboardScreen(navController = rememberNavController())
+        MyScheduleScreen(navController = rememberNavController())
     }
 }
