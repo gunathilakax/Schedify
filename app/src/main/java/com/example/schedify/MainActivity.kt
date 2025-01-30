@@ -1,4 +1,4 @@
-package com.example.schedify // Updated package name
+package com.example.schedify
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -28,6 +28,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.foundation.background
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.filled.*
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.max
+import androidx.compose.ui.unit.sp
+import com.example.schedify.ui.theme.LightGray
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,7 +62,7 @@ fun AppNavigation() {
         composable("welcome") { WelcomeScreen(navController) }
         composable("login") { LoginScreen(navController) }
         composable("register") { RegisterScreen(navController) }
-        composable("dashboard") { DashboardScreen() }
+        composable("dashboard") { DashboardScreen(navController) }
     }
 }
 
@@ -66,7 +76,7 @@ fun WelcomeScreen(navController: NavController) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "SCHEDIFY", // Updated app name
+            text = "SCHEDIFY",
             style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center
@@ -180,7 +190,7 @@ fun RegisterScreen(navController: NavController) {
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var role by remember { mutableStateOf("") }
-    var uniEmail by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
     Column(
@@ -250,8 +260,8 @@ fun RegisterScreen(navController: NavController) {
         Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
-            value = uniEmail,
-            onValueChange = { uniEmail = it },
+            value = email,
+            onValueChange = { email = it },
             label = { Text("University Email") },
             modifier = Modifier.fillMaxWidth(0.9f)
         )
@@ -281,23 +291,285 @@ fun RegisterScreen(navController: NavController) {
 }
 
 @Composable
-fun DashboardScreen() {
-    Column(
+fun DashboardScreen(navController: NavController) {
+    var searchQuery by remember { mutableStateOf("") }
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.Start
+            .background(color = Teal)
     ) {
-        Text(text = "TODAY'S SCHEDULE", style = MaterialTheme.typography.headlineMedium)
-        Spacer(modifier = Modifier.height(16.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 40.dp) // Add padding to avoid overlap with the bottom navigation bar
+        ) {
+            // Top bar with title and search
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = "Today's Schedule",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = LightGray, // Change text color to LightGray
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                // Custom Search Bar
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 40.dp) // Reduced from 48.dp to 40.dp
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color.White)
+                ) {
+                    TextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 40.dp), // Reduced from 48.dp to 40.dp
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedTextColor = Color.Black,
+                            unfocusedTextColor = Color.Black,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        ),
+                        placeholder = {
+                            Text(
+                                text = "Search",
+                                color = Color.Gray
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Search",
+                                tint = Color.Gray
+                            )
+                        },
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp),
+                        textStyle = LocalTextStyle.current.copy(
+                            fontSize = 14.sp, // Reduced from 16.sp to 14.sp
+                            lineHeight = 20.sp  // Reduced from 24.sp to 20.sp
+                        )
+                    )
+                }
+            }
+            
+            // Schedule content
+            val scheduleItems = listOf("Operating System", "Data Structures", "Algorithms", "Networking")
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                    .background(Color.White)
+                    .padding(start = 16.dp, top = 0.dp, end = 16.dp, bottom = 16.dp)
+            ) {
+                items(scheduleItems) { item ->
+                    Spacer(modifier = Modifier.height(6.dp))
+                    ScheduleCard(courseName = item)
+                    Spacer(modifier = Modifier.height(6.dp))
+                }
+            }
+        }
+
+        // Bottom Navigation
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter) // Align the bottom navigation bar to the bottom
+                .fillMaxWidth()
+                .background(Teal) // Set background color to teal
+                .padding(vertical = 8.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                BottomNavItem(
+                    icon = Icons.Default.Home,
+                    label = "Home",
+                    onClick = { navController.navigate("dashboard") }
+                )
+                BottomNavItem(
+                    icon = Icons.Default.DateRange,
+                    label = "My Schedule",
+                    onClick = { navController.navigate("schedule") }
+                )
+                BottomNavItem(
+                    icon = Icons.Default.Add,
+                    label = "Booking",
+                    onClick = { navController.navigate("booking") }
+                )
+                BottomNavItem(
+                    icon = Icons.Default.Person,
+                    label = "Profile",
+                    onClick = { navController.navigate("profile") }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ScheduleCard(courseName: String) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = LightGray) // Change background color to LightGray
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Date section
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.width(80.dp)
+            ) {
+                Text(
+                    text = "JUNE",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Color.Gray
+                )
+                Text(
+                    text = "10",
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = Teal
+                )
+                Text(
+                    text = "2024",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Color.Gray
+                )
+            }
+
+            // Vertical divider
+            HorizontalDivider(
+                modifier = Modifier
+                    .width(2.dp)
+                    .height(90.dp)
+                    .background(color = Teal)
+            )
+
+            // Course details
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = courseName,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Teal
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        Icons.Default.DateRange,
+                        contentDescription = "Time",
+                        modifier = Modifier.size(16.dp),
+                        tint = Color.Gray
+                    )
+                    Text(
+                        text = "8:00 AM - 10:00 AM",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Place,
+                        contentDescription = "Room",
+                        modifier = Modifier.size(16.dp),
+                        tint = Color.Gray
+                    )
+                    Text(
+                        text = "SF 01",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Star,
+                        contentDescription = "Year",
+                        modifier = Modifier.size(16.dp),
+                        tint = Color.Gray
+                    )
+                    Text(
+                        text = "1st Year",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Person,
+                        contentDescription = "Lecturer",
+                        modifier = Modifier.size(16.dp),
+                        tint = Color.Gray
+                    )
+                    Text(
+                        text = "Lecturer Name",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BottomNavItem(
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.clickable { onClick() }
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = label,
+            tint = LightGray, // Change icon color to LightGray
+            modifier = Modifier.size(24.dp)
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = LightGray // Change text color to LightGray
+        )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
-    SchedifyTheme { // Updated theme reference
-        WelcomeScreen(rememberNavController())
+    SchedifyTheme {
+        DashboardScreen(navController = rememberNavController())
     }
 }
