@@ -57,5 +57,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     // Navigation Compose Dependency
-    implementation("androidx.navigation:navigation-compose:2.8.5") // Use the latest version
+    implementation(libs.androidx.navigation.compose) // Use the latest version
+    implementation (libs.androidx.material.icons.extended) // Use the latest version
 }
