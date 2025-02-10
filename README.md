@@ -46,6 +46,7 @@ Schedify is a modern Android application designed to streamline the process of r
 | Home Screen | Register Page | Login View |
 |-------------|--------------|---------------|
 | ![Home](./Screenshot/home.jpg) | ![Register](./Screenshot/register.jpg) | ![Login](./Screenshot/login.jpg) |
+|-------------|--------------|---------------|
 | Dashboard Screen | Reservation Page | Booking View |
 |-------------|--------------|---------------|
 | ![Dashboard](./Screenshot/dashboard.jpg) | ![Reservation](./Screenshot/reservation.jpg) | ![Booking](./Screenshot/booking.jpg) |
